@@ -1,6 +1,6 @@
 # Nesterov Neural Ordinary Differential Equations
 
-This is the official implementation of Nesterov Neural Ordinary Differential Equations. 
+This is the official implementation of PID Neural Ordinary Differential Equations. 
 
 ## Main requirements
 The code base in in Python. The following packages are required:
