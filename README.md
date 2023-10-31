@@ -1,4 +1,4 @@
-# Nesterov Neural Ordinary Differential Equations
+# PID Neural Ordinary Differential Equations
 
 This is the official implementation of PID Neural Ordinary Differential Equations. 
 
