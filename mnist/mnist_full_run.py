@@ -25,9 +25,9 @@ parser.add_argument('--log-file', default="outdat1", help="name of the logging c
 parser.add_argument('--no-run', action="store_true", help="To not run the training procedure")
 parser.add_argument('--batch-size', type=int, default=64)
 
-# 针对于pidhbnode泛化类型的输入参数
+# 针对于pidnode泛化类型的输入参数
 parser.add_argument('--pid-general-type', type=int, default=3)
-# 临时补充pidhbnode参数的输入
+# 临时补充pidnode参数的输入
 parser.add_argument('--kp', type=float, default=2.)
 parser.add_argument('--ki', type=float, default=2.)
 parser.add_argument('--kd', type=float, default=1.5)
@@ -80,10 +80,10 @@ class hbnode_initial_velocity(nn.Module):
         return out
 
 
-class pidhbnode_initial_velocity(nn.Module):
+class pidnode_initial_velocity(nn.Module):
 
     def __init__(self, in_channels, out_channels, nhid, gpu=0):
-        super(pidhbnode_initial_velocity, self).__init__()
+        super(pidnode_initial_velocity, self).__init__()
         assert (3 * out_channels >= in_channels)
         self.actv = nn.LeakyReLU(0.3)
         self.fc1 = nn.Conv2d(in_channels, nhid, kernel_size=1, padding=0)
@@ -221,68 +221,24 @@ def model_gen(name, gpu, **kwargs):
                           time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
         model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
                               layer, predictionlayer(dim, truncate=True))
-    elif name == 'nesterovnode':
-        dim = 5
-        nhid = 50
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(NesterovNODE(DF(dim, nhid), None, use_h=True, sign=-1), nesterov_algebraic=True,
-                          time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'gnesterovnode':
-        dim = 5
-        nhid = 50
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(
-            NesterovNODE(DF(dim, nhid), actv_h=hard_tanh_half, actv_df=hard_tanh_half, corr=2.0, corrf=False,
-                         use_h=True, sign=-1), nesterov_algebraic=True, activation_h=hard_tanh_half,
-            time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'high_nesterovnode':
-        dim = 5
-        nhid = 50
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(HighNesterovNODE2(DF(dim, nhid), None, use_h=True, sign=-1), nesterov_algebraic=False,
-                          time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'high_nesterovnode_30nhid':
-        dim = 5
-        nhid = 30
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(HighNesterovNODE2(DF(dim, nhid), None, use_h=True, sign=-1), nesterov_algebraic=False,
-                          time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'ghigh_nesterovnode':
-        dim = 5
-        nhid = 50
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(
-            HighNesterovNODE2(DF(dim, nhid), actv_h=hard_tanh_half, actv_df=hard_tanh_half, corr=2.0, corrf=False,
-                              use_h=True, sign=-1), nesterov_algebraic=True, activation_h=hard_tanh_half,
-            time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'pidhbnode':
+    elif name == 'pidnode':
         dim = 5
         nhid = 49
         evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(PIDHBNODE(DF(dim, nhid), None, sign=-1, ki=args.ki, kp=args.kp, kd=args.kd),
+        layer = NODElayer(PIDNODE(DF(dim, nhid), None, sign=-1, ki=args.ki, kp=args.kp, kd=args.kd),
                           nesterov_algebraic=False,
                           time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(pidhbnode_initial_velocity(1, dim, nhid),
+        model = nn.Sequential(pidnode_initial_velocity(1, dim, nhid),
                               layer, predictionlayer(dim, truncate=True)).to(device=args.gpu)
-    elif name == 'pidghbnode':
+    elif name == 'gpidnode':
         dim = 5
         nhid = 49
         evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(PIDHBNODE(DF(dim, nhid), sign=-1, actv_h=hard_tanh_half, actv_df=hard_tanh_half, ki=args.ki,
+        layer = NODElayer(PIDNODE(DF(dim, nhid), sign=-1, actv_h=hard_tanh_half, actv_df=hard_tanh_half, ki=args.ki,
                                     kp=args.kp, kd=args.kd, corr=2.0, corrf=False, general_type=args.pid_general_type),
                           nesterov_algebraic=False, time_requires_grad=False,
                           evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(pidhbnode_initial_velocity(1, dim, nhid),
+        model = nn.Sequential(pidnode_initial_velocity(1, dim, nhid),
                               layer, predictionlayer(dim, truncate=True)).to(device=args.gpu)
     else:
         print('model {} not supported.'.format(name))

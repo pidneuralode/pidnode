@@ -137,52 +137,32 @@ class DF(nn.Module):
 modelnames = [
     'NODE', 'ANODE', 'SONODE',
     'HBNODE', 'GHBNODE',
-    # 'NesterovNODE',
-    # 'GNesterovNODE',
-    # 'HighNesterov',
-    # 'GHighNesterov',
     'PIDNODE'
 ]
 modelclass = [
     NODE, NODE, SONODE,
     HeavyBallNODE, HeavyBallNODE,
-    # NesterovNODE,
-    # NesterovNODE,
-    # HighNesterovNODE2,
-    # HighNesterovNODE2,
-    PIDHBNODE
+    PIDNODE
 ]
 icparams = [
     (1, 1, 0), (2, 1, 1), (1, 2, 0),
     (1, 2, 0), (1, 2, 0),
-    # (1, 2, 0),
-    # (1, 2, 0), (1, 2, 0), (1, 2, 0),
     (1, 2, 0),
 ]  # out_channels, ddim, zpad
 dfparams = [
     (1,), (2,), (2, 1),
     (1,), (1,),
-    # (1,),
-    # (1,), (1,), (1,),
     (1,),
 ]
 hard_tanh = nn.Hardtanh(-0.25, 0.25)
 nintparams = [
     dict(), dict(), dict(),
     dict(), dict(),
-    # {'nesterov_algebraic': True},
-    # {'nesterov_algebraic': True, 'activation_h': hard_tanh},
-    # dict(), dict(),
     dict()
 ]
 cellparams = [
     dict(), dict(), dict(),
     dict(), {'corr': 0, 'actv_h': hard_tanh},
-    # {'use_h': True},
-    # {'use_h': True, 'corr': 0, 'actv_h': hard_tanh, 'actv_df': hard_tanh},
-    # {'use_h': True},
-    # {'use_h': True, 'corr': 0, 'actv_h': hard_tanh, 'actv_df': hard_tanh},
-    # 这里采用的相比于传统的heavy-ball加速模型引入了pid的积分项，同时将其他的参数项预先设置为0
     {'kp': 2, 'ki': 2, 'kd': 1.5}
 ]
 model_list = []
@@ -232,12 +212,10 @@ line_widths = [
 # '''
 sizedata = []
 num_epochs = 60
-# plt.axis("scaled")
 for i in range(5):
     print(i, modelnames[i])
     odesizelist = []
     for r in range(10):
-        # for epoch_idx in range(num_epochs):
         cell = modelclass[i](DF(*dfparams[i]), **cellparams[i])
         ic = initial_velocity(input_t, *icparams[i])
         nint = NODEintegrate(cell, time_requires_grad=False, evaluation_times=torch.arange(1, 80.), tol=1e-7,
@@ -250,7 +228,7 @@ for i in range(5):
     plt.plot(dat, line_styles[i], linewidth=line_widths[i], label=modelnames[i], color=colors[i])
     sizedata.append(dat)
 
-for i in range(5, 6):  # pidhbnode
+for i in range(5, 6):  # pidnode
     print(i, modelnames[i])
     odesizelist = []
     for r in range(10):
@@ -265,34 +243,23 @@ for i in range(5, 6):  # pidhbnode
     dat = np.log10(np.mean(odesizelist, axis=0))
     plt.plot(dat, line_styles[i], label=modelnames[i], linewidth=15, color=colors[i])
     sizedata.append(dat)
-# '''
-# sizedata = np.loadtxt('output/sb/sbinit.csv', delimiter=',')
-# for i in range(13):
-#     plt.plot(sizedata[i], label=modelnames[i], linewidth=5, color=colors[i])
 
 plt.plot(np.log10(np.abs(trdat[1][:81])), label='Exact', linewidth=5, color='k')
 tickrange = np.linspace(0, 18, 7)
 plt.yticks(tickrange, ['$10^{{{}}}$'.format(int(i)) for i in tickrange])
-# ax.yaxis.set_major_formatter('10^{x}')
 plt.xlabel("$t$", fontsize=50)
 plt.ylabel("||${\\mathbf{h}}(t)||_2$", fontsize=40)
 plt.grid(which='major', color='white', linewidth=1.2)
 plt.grid(which='minor', color='white', linewidth=0.6)
-# plt.grid(b=True, which='major', color='#666666', linestyle='-')
 plt.minorticks_on()
-# plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
 plt.xlim(0, 60)
 plt.tick_params(which='minor', bottom=False, left=False)
 
-# 消除图像周边的边框
-# and make the Spines Visibility as False
 for pos in ['right', 'top', 'bottom', 'left']:
     plt.gca().spines[pos].set_visible(False)
 
 handles, labels = plt.gca().get_legend_handles_labels()
 by_label = dict(zip(labels, handles))
-# plt.legend(by_label.values(), by_label.keys(), loc='upper left', fontsize=50, framealpha=1, fancybox=True, shadow=True,
-#            facecolor=(0.8941, 0.8942, 0.9333), edgecolor='gray')
 plt.legend(by_label.values(), by_label.keys(), loc='upper left', fontsize=40, framealpha=1, fancybox=True, shadow=True)
 
 plt.tight_layout()

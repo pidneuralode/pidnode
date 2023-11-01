@@ -14,35 +14,25 @@ names = [
     "anode",
     "sonode",
     "hbnode",
-    # "nesterovnode",
-    # 'gnesterovnode',
     "ghbnode",
-    "pidhbnode",
-    "pidghbnode"
-    # 'high_nesterovnode',
-    # 'ghigh_nesterovnode'
+    "pidnode",
+    "gpidnode"
 ]
 alt_names = [
     "NODE",
     "ANODE",
     "SONODE",
     "HBNODE",
-    # "NesterovNODE",
-    # "GNesterovNODE",
     "GHBNODE",
     "PIDNODE",
     "GPIDNODE"
-    # "High-NesterovNODE",
-    # "GHigh-NesterovNODE"
 ]
-# pidghbnode_file = "pidghbnode_with_resnet_1e-05.csv"
+# gpidnode_file = "gpidnode_with_resnet_1e-05.csv"
 df_names = {}
 for name in names:
     # filepath = f"../imgdat/1_2/{name}_{tolerance}.csv"
-    # if name != "pidghbnode":
+    # if name != "gpidnode":
     filepath = f"C:/Users/29373/Desktop/NesterovNODE-main/NesterovNODE-main/mnist/imgdat/0_1/{name}_{tolerance}.csv"
-    # else:
-    #     filepath = f"C:/Users/29373/Desktop/NesterovNODE-main/NesterovNODE-main/mnist/imgdat/0_1/{pidghbnode_file}"
 
     temp_df = pd.read_csv(filepath, header=None,
                           names=["model", "test#", "train/test", "iter", "loss", "acc", "forwardnfe", "backwardnfe",
@@ -93,12 +83,8 @@ ax2 = fig.add_subplot(gs[0, 2:4])
 ax3 = fig.add_subplot(gs[0, 4:])
 ax4 = fig.add_subplot(gs[1, 1:3])
 ax6 = fig.add_subplot(gs[1, 3:5])
-# ax7 = fig.add_subplot(gs[2, 1:3])
-# ax8 = fig.add_subplot(gs[2, 3:5])
-# axes = (ax1, ax2, ax4, ax5, ax7, ax8)
 axes = (ax1, ax2, ax4)
 height_width_ratio = "auto"
-# alt_attr_names = ["NFEs (forward)", "NFEs (backward)", "Loss", "Time/iter", "Gamma", "Corr"]
 alt_attr_names = ["NFEs (forward)", "NFEs (backward)", "Loss"]
 for j, attribute in enumerate(["forwardnfe", "backwardnfe", "loss"]):
     axes[j].set_aspect(height_width_ratio)

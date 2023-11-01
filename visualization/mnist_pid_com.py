@@ -1,4 +1,4 @@
-# 比较在不同的pid参数下的pidnode表现
+# 比较在不同的pid参数下的pidnode_rnn_walker表现
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -73,9 +73,6 @@ ax2 = fig.add_subplot(gs[0, 2:4])
 ax3 = fig.add_subplot(gs[0, 4:])
 ax4 = fig.add_subplot(gs[1, 1:3])
 ax6 = fig.add_subplot(gs[1, 3:5])
-# ax7 = fig.add_subplot(gs[2, 1:3])
-# ax8 = fig.add_subplot(gs[2, 3:5])
-# axes = (ax1, ax2, ax4, ax5, ax7, ax8)
 axes = (ax1, ax2, ax4)
 height_width_ratio = "auto"
 # alt_attr_names = ["NFEs (forward)", "NFEs (backward)", "Loss", "Time/iter", "Gamma", "Corr"]

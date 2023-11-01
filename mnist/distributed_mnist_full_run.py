@@ -28,10 +28,6 @@ parser.add_argument('--lr', type=float, default=0.001)
 parser.add_argument('--timeout', type=int, default=10000, help='Maximum time/iter to do early dropping')
 parser.add_argument('--nfe-timeout', type=int, default=300,
                     help='Maximum nfe (forward or backward) to do early dropping')
-# parser.add_argument('--names', nargs='+',
-#                     default=['node', 'anode', 'sonode', 'hbnode', 'ghbnode', 'nnode', 'nesterovnode', 'gnesterovnode',
-#                              'high_nesterovnode', 'ghigh_nesterovnode'],
-#                     help="List of models to run")
 parser.add_argument('--names', nargs='+',
                     default=['hbnode', 'high_nesterovnode2', 'ghigh_nesterovnode2'],
                     help="List of models to run")
@@ -195,62 +191,6 @@ def model_gen(name, gpu, **kwargs):
         evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
         layer = NODElayer(HeavyBallNODE(DF(dim, nhid, gpu), actv_h=nn.Tanh(), corr=2.0, corrf=False),
                           time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'nesterovnode':
-        dim = 5
-        nhid = 50
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(NesterovNODE(DF(dim, nhid, gpu), None, use_h=True, sign=-1), nesterov_algebraic=True,
-                          time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'gnesterovnode':
-        dim = 5
-        nhid = 50
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(
-            NesterovNODE(DF(dim, nhid, gpu), actv_h=hard_tanh_half, actv_df=hard_tanh_half, corr=2.0, corrf=False,
-                         use_h=True, sign=-1), nesterov_algebraic=True, activation_h=hard_tanh_half,
-            time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'high_nesterovnode':
-        dim = 5
-        nhid = 50
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(
-            High_NesterovNODE(DF(dim, nhid, gpu), actv_h=hard_tanh_half, actv_df=hard_tanh_half, corr=2.0, corrf=False,
-                         use_h=True, sign=-1, u = 0.1, s = 0.1), nesterov_algebraic=True, activation_h=hard_tanh_half,
-            time_requires_grad=False, evaluation_times=evaluation_times,**kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'ghigh_nesterovnode':
-        dim = 5
-        nhid = 50
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(
-            Generalized_High_NesterovNODE(DF(dim, nhid, gpu), actv_h=hard_tanh_half, actv_df=hard_tanh_half, corr=2.0, corrf=False,
-                         use_h=True, sign=-1, u=0.1, s=0.1), nesterov_algebraic=True, activation_h=hard_tanh_half,
-            time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'high_nesterovnode2':
-        dim = 5
-        nhid = 50
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(HighNesterovNODE2(DF(dim, nhid, gpu), None, use_h=True, sign=-1), nesterov_algebraic=True,
-                          time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
-        model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
-                              layer, predictionlayer(dim, truncate=True))
-    elif name == 'ghigh_nesterovnode2':
-        dim = 5
-        nhid = 50
-        evaluation_times = torch.Tensor([1, 2]).to(device=gpu)
-        layer = NODElayer(
-            HighNesterovNODE2(DF(dim, nhid, gpu), actv_h=hard_tanh_half, actv_df=hard_tanh_half, corr=2.0, corrf=False,
-                         use_h=True, sign=-1), nesterov_algebraic=True, activation_h=hard_tanh_half,
-            time_requires_grad=False, evaluation_times=evaluation_times, **kwargs)
         model = nn.Sequential(hbnode_initial_velocity(1, dim, nhid),
                               layer, predictionlayer(dim, truncate=True))
     else:

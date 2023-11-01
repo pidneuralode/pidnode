@@ -6,10 +6,7 @@ font = {'size': 40}
 plt.rc('font', **font)
 
 tolerance = "1e-05"
-# names = ["node", "anode", "sonode", "hbnode", "ghbnode", "nesterovnode", "gnesterovnode"]
-# alt_names = ["NODE", "ANODE", "SONODE", "HBNODE", "GHBNODE", "NesterovNODE", "GNesterovNODE"]
-# names = ["sonode", "hbnode", "ghbnode", "nesterovnode", "gnesterovnode", "pidhbnode", "pidghbnode"]
-names = ["node", "anode", "sonode", "hbnode", "ghbnode", "pidhbnode", "pidghbnode"]
+names = ["node", "anode", "sonode", "hbnode", "ghbnode", "pidnode", "gpidnode"]
 alt_names = ["NODE", "ANODE", "SONODE", "HBNODE", "GHBNODE", "PIDNODE", "GPIDNODE"]
 df_names = {}
 for name in names:

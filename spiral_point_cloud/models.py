@@ -23,9 +23,9 @@ class initial_velocity(nn.Module):
 
 
 # pid三维形式的变量引入
-class pidhbnode_initial_velocity(nn.Module):
+class pidnode_initial_velocity(nn.Module):
     def __init__(self, dim, nhidden, gpu):
-        super(pidhbnode_initial_velocity, self).__init__()
+        super(pidnode_initial_velocity, self).__init__()
         self.tanh = nn.Hardtanh(min_val=-5.0, max_val=5.0, inplace=False)
         self.fc1 = nn.Linear(dim, nhidden)
         self.fc2 = nn.Linear(nhidden, nhidden)
@@ -45,7 +45,7 @@ class pidhbnode_initial_velocity(nn.Module):
         out = torch.cat([x0, out, v0], dim=0)
         return out
 
-# 这个类需要对于pidhbnode做特定的适配操作
+# 这个类需要对于pidnode做特定的适配操作
 class ODEBlock(nn.Module):
 
     def __init__(self, odefunc, t0_, tN_, tol, half=False, one_third=False, nesterov_algebraic=False, actv_k=None,

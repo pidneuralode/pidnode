@@ -11,30 +11,22 @@ plt.rc('font', **font)
 names = ["NODE", "ANODE",
          "SONODE",
          "HBNODE", "GHBNODE",
-         # "NesterovNODE", "GNesterovNODE",
-          "PIDHBNODE",
-         "PIDGHBNODE",
-         # "HighNesterovNODE", "GHighNesterovNODE"
+          "PIDNODE",
+         "GPIDNODE",
          ]
 # 画图中指代的模型的名称，可能会出现不一致的情况
 alt_names = ["NODE", "ANODE",
          "SONODE",
          "HBNODE", "GHBNODE",
-         # "NesterovNODE", "GNesterovNODE",
          "PIDNODE",
          "GPIDNODE",
-         # "HighNesterovNODE", "GHighNesterovNODE"
          ]
 # 直接导入对应的csv文件信息
 file_names = ["../output/walker2d/walker_NODE_rnn_9929.csv", "../output/walker2d/walker_ANODE_rnn_10019.csv",
               "../output/walker2d/walker_SONODE_rnn_9861.csv",
               "../output/walker2d/walker_HBNODE_rnn_10099_12.csv", "../output/walker2d/walker_GHBNODE_rnn_10099_12.csv",
-              # "../output/walker2d/walker_NesterovNODE_rnn_10098.csv",
-              # "../output/walker2d/walker_GNesterovNODE_rnn_10098_12.csv",
-              "../output/walker2d/walker_PIDHBNODE_rnn_10055.csv",
-              "../output/walker2d/walker_PIDGHBNODE_rnn_10055.csv",
-              # "../output/walker2d/walker_HighNesterovNODE_rnn_10100.csv",
-              # "../output/walker2d/walker_GHighNesterovNODE_rnn_10100.csv",
+              "../output/walker2d/walker_PIDNODE_rnn_10055.csv",
+              "../output/walker2d/walker_GPIDNODE_rnn_10055.csv",
               ]
 df_names = {}
 attr_names = ["epoch", "forward_nfe", "backward_nfe", "train_time", "loss", "ts_loss", "ts_nfe", "va_loss", "va_nfe"]

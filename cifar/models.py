@@ -26,21 +26,18 @@ class DF(nn.Module):
         super(DF, self).__init__()
         self.args = args
         if self.args.model in (
-        'node', 'anode', 'hbnode', 'ghbnode', 'nesterovnode', 'gnesterovnode', 'node_ss', 'ghbnode_ss',
-        'gnesterovnode_ss', "pidhbnode", "high_nesterovnode", "ghigh_nesterovnode", "pidghbnode"):
+        'node', 'anode', 'hbnode', 'ghbnode', 'node_ss', 'ghbnode_ss',
+        'pidnode', 'gpidnode'):
             in_dim = in_channels
         if self.args.model == 'sonode':
             in_dim = 2 * in_channels
-            # if out_channels is None:
-            #     out_channels = in_channels
         self.activation = nn.ReLU(inplace=True)  # nn.LeakyReLU(0.3)
         self.fc1 = nn.Conv2d(in_dim + 1, nhidden, kernel_size=1, padding=0)
         self.fc2 = nn.Conv2d(nhidden + 1, nhidden, kernel_size=3, padding=1)
         self.fc3 = nn.Conv2d(nhidden + 1, in_channels, kernel_size=1, padding=0)
 
     def forward(self, t, x0):
-        if self.args.model in ('hbnode', 'ghbnode', 'nesterovnode', 'gnesterovnode', 'ghbnode_ss', 'gnesterovnode_ss',
-                               "pidhbnode", "high_nesterovnode", "ghigh_nesterovnode", "pidghbnode"):
+        if self.args.model in ('hbnode', 'ghbnode', "pidnode", "gpidnode"):
             out = rearrange(x0, 'b 1 c x y -> b c x y')
         if self.args.model == 'anode':
             out = rearrange(x0, 'b d c x y -> b (d c) x y')
@@ -64,8 +61,7 @@ class DF(nn.Module):
         if self.args.model == 'hbnode' or self.args.model == 'ghbnode' or self.args.model == 'ghbnode_ss':
             return out + self.args.xres * x0
         elif self.args.model in (
-        'anode', 'sonode', 'node', 'nesterovnode', 'gnesterovnode', 'node_ss', 'gnesterovnode_ss',
-        "pidhbnode", "high_nesterovnode", "ghigh_nesterovnode", "pidghbnode"):
+        'anode', 'sonode', 'node', 'node_ss', "pidnode", "gpidnode"):
             return out
         else:
             raise NotImplementedError
@@ -286,7 +282,7 @@ class HighNesterovNODE(NODE):
         return out
 
 
-class PIDHBNODE(NODE):
+class PIDNODE(NODE):
     def __init__(self, df, actv_h=None, gamma=-3.0, gammaact='sigmoid', corr=-100, corrf=True, sign=1,
                  kp=2, ki=1.5, kd=5, actv_m=None, actv_dm=None, actv_df=None, general_type=3):
         # 目前最优的一组参数:kp=2 ki=1.5 kd=5
@@ -418,10 +414,10 @@ class anode_initial_velocity(nn.Module):
         out[:, :, :3] += x0
         return out
 
-class pidhbnode_initial_velocity(nn.Module):
+class pidnode_initial_velocity(nn.Module):
 
     def __init__(self, in_channels, out_channels, nhid):
-        super(pidhbnode_initial_velocity, self).__init__()
+        super(pidnode_initial_velocity, self).__init__()
         assert (3 * out_channels >= in_channels)
         self.actv = nn.LeakyReLU(0.3)
         self.fc1 = nn.Conv2d(in_channels, nhid, kernel_size=1, padding=0)

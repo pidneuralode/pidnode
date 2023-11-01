@@ -21,10 +21,9 @@ from point_cloud.experiments.dataloaders import ConcentricSphere
 from point_cloud.visualization.plots import get_feature_history
 from point_cloud.training import Trainer
 from point_cloud.visualization.plots import single_feature_plt
-# from base import NODElayer, NODE, SONODE, HeavyBallNODE, NesterovNODE, NODEintegrate
 from point_cloud.visualization.plots import multi_feature_plt
-from point_cloud.models import initial_velocity, ODEBlock, Decoder, count_parameters, pidhbnode_initial_velocity
-from point_cloud.ode_functions import NODEfunc, SONODEfunc, NesterovNODEfunc, HighNesterovNODEfunc, PIDHBNODEfunc
+from point_cloud.models import initial_velocity, ODEBlock, Decoder, count_parameters, pidnode_initial_velocity
+from point_cloud.ode_functions import NODEfunc, SONODEfunc, PIDNODEfunc
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--tol', type=float, default=1e-7)
@@ -34,7 +33,7 @@ parser.add_argument('--num-runs', help='Number of independent runs per model', d
 parser.add_argument('--gpu', type=int, default=0)
 parser.add_argument('--output-directory', default='point_cloud')
 parser.add_argument('--batch-size', default=50, type=int)
-parser.add_argument('--names', nargs='+', help='List of models to run', default=["pidhbnode"])
+parser.add_argument('--names', nargs='+', help='List of models to run', default=["pidnode"])
 parser.add_argument('--xi', help='Value of the "xi" term in generalized model', type=float, default=0.5)
 parser.add_argument('--visualize-std', action="store_true", help='Whether to plot one std from the mean')
 parser.add_argument('--visualize-features', action="store_true",
@@ -42,7 +41,7 @@ parser.add_argument('--visualize-features', action="store_true",
 parser.add_argument('--loss', default="smoothl1", help='loss for training')
 # 支持对于相同的模型引入不同的参数
 parser.add_argument('--extra-name', help='the extra name or parameter of model', default='test')
-# 支持对于PIDHBNODE引入不同的pid参数，方便找到最合适的参数类型
+# 支持对于PIDNODE引入不同的pid参数，方便找到最合适的参数类型
 parser.add_argument('--kp', type=float, default=2.)
 parser.add_argument('--ki', type=float, default=2.)
 parser.add_argument('--kd', type=float, default=1.5)
@@ -84,12 +83,9 @@ class ODENet(nn.Module):
 
 device = torch.device(f'cuda:{args.gpu}')
 output_directory = f"output/{args.output_directory}"
-full_names = ["node", "anode", "sonode", "hbnode", "ghbnode", "nesterovnode", "gnesterovnode", "pidhbnode",
-              "pidghbnode",
-              "high_nesterovnode", "ghigh_nesterov"]
+full_names = ["node", "anode", "sonode", "hbnode", "ghbnode", "pidnode", "gpidnode"]
 names = full_names if args.names is None else args.names
-alt_names = ["NODE", "ANODE", "SONODE", "HBNODE", "GHBNODE", "NesterovNODE", "GNesterovNODE", "PIDHBNODE", "PIDGHBNODE",
-             "HighNesterovNODE", "GHighNesterovNODE"]
+alt_names = ["NODE", "ANODE", "SONODE", "HBNODE", "GHBNODE", "PIDNODE", "GPIDNODE"]
 all_histories = []
 num_epochs = args.num_epochs
 tol = args.tol
@@ -138,42 +134,18 @@ for i, name in enumerate(names):
                 feature_layers = [initial_velocity(data_dim, nhid), ODEBlock(SONODEfunc(
                     data_dim, nhid, modelname="GHBNODE", actv=hard_tanh_half), t0, tN, tol=tol, half=True),
                                   Decoder(data_dim, 1)]
-            elif name == "nesterovnode":
+            elif name == 'pidnode':
+                # 初步给出pidnode_rnn_walker模型
                 nhid = 14
-                feature_layers = [initial_velocity(data_dim, nhid), ODEBlock(NesterovNODEfunc(
-                    data_dim, nhid, modelname="NesterovNODE"), t0, tN, tol=tol, half=True, nesterov_algebraic=True),
-                                  Decoder(data_dim, 1)]
-            elif name == "gnesterovnode":
-                nhid = 14
-                feature_layers = [initial_velocity(data_dim, nhid), ODEBlock(NesterovNODEfunc(
-                    data_dim, nhid, modelname="GNesterovNODE", xi=args.xi, actv=hard_tanh_5), 1, 2, tol=tol, half=True,
-                    nesterov_algebraic=True, actv_k=hard_tanh_5, use_momentum=False), Decoder(data_dim, 1)]
-            elif name == 'high_nesterovnode':
-                # 初步给出高分辨率模型
-                nhid = 14
-                feature_layers = [initial_velocity(data_dim, nhid), ODEBlock(HighNesterovNODEfunc(
-                    data_dim, nhid, modelname="NesterovNODE", args=args), t0, tN, tol=tol, half=True,
-                    nesterov_algebraic=False),
-                                  Decoder(data_dim, 1)]
-            elif name == 'ghigh_nesterovnode':
-                # 初步给出高分辨率模型
-                nhid = 14
-                feature_layers = [initial_velocity(data_dim, nhid), ODEBlock(HighNesterovNODEfunc(
-                    data_dim, nhid, modelname="GNesterovNODE", xi=args.xi, actv=hard_tanh_5, args=args), 1, 2, tol=tol,
-                    half=True,
-                    nesterov_algebraic=False, actv_k=hard_tanh_5, use_momentum=False), Decoder(data_dim, 1)]
-            elif name == 'pidhbnode':
-                # 初步给出pidnode模型
-                nhid = 14
-                feature_layers = [pidhbnode_initial_velocity(data_dim, nhid, args.gpu), ODEBlock(PIDHBNODEfunc(
-                    data_dim, nhid, kp=args.kp, ki=args.ki, kd=args.kd, modelname="PIDHBNODE"),
+                feature_layers = [pidnode_initial_velocity(data_dim, nhid, args.gpu), ODEBlock(PIDNODEfunc(
+                    data_dim, nhid, kp=args.kp, ki=args.ki, kd=args.kd, modelname="PIDNODE"),
                     t0, tN, tol=tol, one_third=True, nesterov_algebraic=False),
                                   Decoder(data_dim, 1)]
-            elif name == 'pidghbnode':
-                # 初步给出泛化的pidnode模型
+            elif name == 'gpidnode':
+                # 初步给出泛化的pidnode_rnn_walker模型
                 nhid = 14
-                feature_layers = [pidhbnode_initial_velocity(data_dim, nhid, args.gpu), ODEBlock(PIDHBNODEfunc(
-                    data_dim, nhid, kp=args.kp, ki=args.ki, kd=args.kd, modelname="PIDGHBNODE", xi=args.xi,
+                feature_layers = [pidnode_initial_velocity(data_dim, nhid, args.gpu), ODEBlock(PIDNODEfunc(
+                    data_dim, nhid, kp=args.kp, ki=args.ki, kd=args.kd, modelname="GPIDNODE", xi=args.xi,
                     actv=hard_tanh_5, actv_h=hard_tanh_1, actv_df=hard_tanh_1),
                     t0, tN, tol=tol,
                     one_third=True, nesterov_algebraic=False, actv_k=hard_tanh_5, use_momentum=False),

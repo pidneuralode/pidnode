@@ -25,14 +25,14 @@ class temprnn(nn.Module):
     def __init__(self, in_channels, out_channels, nhidden, res=False, cont=False):
         super().__init__()
         self.actv = nn.Tanh()
-        self.dense1 = nn.Linear(in_channels + 2 * nhidden, 2 * nhidden)
-        self.dense2 = nn.Linear(2 * nhidden, 2 * nhidden)
-        self.dense3 = nn.Linear(2 * nhidden, 2 * out_channels)
+        self.dense1 = nn.Linear(in_channels + 3 * nhidden, 3 * nhidden)
+        self.dense2 = nn.Linear(3 * nhidden, 3 * nhidden)
+        self.dense3 = nn.Linear(3 * nhidden, 3 * out_channels)
         self.cont = cont
         self.res = res
 
     def forward(self, h, x):
-        out = torch.cat([h[:, 0], h[:, 1], x], dim=1)
+        out = torch.cat([h[:, 0], h[:, 1], h[:, 2], x], dim=1)
         out = self.dense1(out)
         out = self.actv(out)
         out = self.dense2(out)
@@ -45,12 +45,11 @@ class temprnn(nn.Module):
 class MODEL(nn.Module):
     def __init__(self, res=False, cont=False):
         super(MODEL, self).__init__()
-        nhid = 24
-        self.cell = HighNesterovNODE2(tempf(nhid, nhid), nesterov_algebraic=False)
+        nhid = 17
+        self.cell = PIDNODE(tempf(nhid, nhid))
         self.rnn = temprnn(17, nhid, nhid, res=res, cont=cont)
         evaluation_times = torch.Tensor([1, 2])
-        self.ode_rnn = ODE_RNN_with_Grad_Listener(self.cell, self.rnn, (2, nhid), None, tol=1e-7,
-                                                  time_requires_grad=False, evaluation_times=evaluation_times)
+        self.ode_rnn = ODE_RNN_with_Grad_Listener(self.cell, self.rnn, (3, nhid), None, tol=1e-7, nesterov_algebraic=False, time_requires_grad=False, evaluation_times=evaluation_times)
         self.outlayer = nn.Linear(nhid, 17)
 
     def forward(self, t, x):
@@ -67,7 +66,9 @@ def main(gpu_device):
     cont = True
     torch.manual_seed(0)
     model = MODEL(res=res, cont=cont).to(gpu_device)
-    modelname = 'HighNesterovNODE'
+    modelname = 'PIDNODE'
+    # 这里需要对于升维之后的数据进行前置的处理
+    # model.load_state_dict(torch.load('output/walker2d/walker_{}_rnn_{}.csv'.format(modelname, count_parameters(model))))
     print(model.__str__())
     rec = Recorder()
     criteria = nn.MSELoss()
@@ -77,6 +78,7 @@ def main(gpu_device):
     for epoch in range(500):
         rec['epoch'] = epoch
         if epoch in lr_dict:
+            # 强行对优化器的学习率进行调整
             optimizer = torch.optim.Adam(model.parameters(), lr=lr_dict[epoch])
 
         batchsize = 256

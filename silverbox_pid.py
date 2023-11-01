@@ -132,76 +132,48 @@ class DF(nn.Module):
         # out = 0.4905 * x + 0.00618 * x ** 3 + 0.0613 * v1
         return out
 
-
-# modelnames = [
-#     'GNesterovNODE', 'GHBNODE',
-#     'PIDHBNODE(kd=5)', 'PIDHBNODE(kd=2.5)', 'PIDHBNODE(kd=1)',
-#     'PIDHBNODE(kd=0.5)', 'PIDHBNODE(kd=10)', 'PIDHBNODE(kd=50)',
-#     'PIDHBNODE(kd=100)', 'PIDHBNODE(kd=200)'
-# ]
-
 # 目前的基准模型为 kp=2, ki=1.5, kd=2 的pid模型
 modelnames = [
     'GNesterovNODE', 'GHBNODE',
-    'PIDHBNODE(ki=1.5)', 'PIDHBNODE(ki=3)', 'PIDHBNODE(ki=5)',
-    'PIDHBNODE(ki=10)', 'PIDHBNODE(ki=20)', 'PIDHBNODE(ki=1)',
-    'PIDHBNODE(ki=0.5)', 'PIDHBNODE(ki=0)'
+    'PIDNODE(ki=1.5)', 'PIDNODE(ki=3)', 'PIDNODE(ki=5)',
+    'PIDNODE(ki=10)', 'PIDNODE(ki=20)', 'PIDNODE(ki=1)',
+    'PIDNODE(ki=0.5)', 'PIDNODE(ki=0)'
 ]
-
-# modelnames = [
-#     'GNesterovNODE', 'GHBNODE',
-#     'PIDHBNODE(kp=2)', 'PIDHBNODE(kp=4)', 'PIDHBNODE(kp=10)',
-#     'PIDHBNODE(kp=20)', 'PIDHBNODE(kp=500)', 'PIDHBNODE(kp=0.5)',
-#     'PIDHBNODE(kp=0.1)', 'PIDHBNODE(kp=1)'
-# ]
 
 
 modelclass = [
-    NesterovNODE, HeavyBallNODE,
-    PIDHBNODE, PIDHBNODE, PIDHBNODE,
-    PIDHBNODE, PIDHBNODE, PIDHBNODE,
-    PIDHBNODE, PIDHBNODE
+    HeavyBallNODE,
+    PIDNODE, PIDNODE, PIDNODE,
+    PIDNODE, PIDNODE, PIDNODE,
+    PIDNODE, PIDNODE
 ]
 icparams = [
-    (1, 2, 0), (1, 2, 0),
+    (1, 2, 0),
     (1, 2, 0), (1, 2, 0), (1, 2, 0),
     (1, 2, 0), (1, 2, 0), (1, 2, 0),
     (1, 2, 0), (1, 2, 0)
 ]  # out_channels, ddim, zpad
 dfparams = [
-    (1,), (1,),
+    (1,),
     (1,), (1,), (1,),
     (1,), (1,), (1,),
     (1,), (1,)
 ]
 hard_tanh = nn.Hardtanh(-0.25, 0.25)
 nintparams = [
-    {'nesterov_algebraic': True, 'activation_h': hard_tanh}, dict(),
+    dict(),
     dict(), dict(), dict(),
     dict(), dict(), dict(),
     dict(), dict()
 ]
-# cellparams = [
-#     {'use_h': True, 'corr': 0, 'actv_h': hard_tanh, 'actv_df': hard_tanh},
-#     {'corr': 0, 'actv_h': hard_tanh},
-#     {'kd': 5}, {'kd': 2.5}, {'kd': 1},
-#     {'kd': 0.5}, {'kd': 10}, {'kd': 50},
-#     {'kd': 100}, {'kd': 200}
-# ]
+
 cellparams = [
-    {'use_h': True, 'corr': 0, 'actv_h': hard_tanh, 'actv_df': hard_tanh},
     {'corr': 0, 'actv_h': hard_tanh},
     {'ki': 1.5}, {'ki': 3}, {'ki': 5},
     {'ki': 10}, {'ki': 20}, {'ki': 1},
     {'ki': 0.5}, {'ki': 0.1}
 ]
-# cellparams = [
-#     {'use_h': True, 'corr': 0, 'actv_h': hard_tanh, 'actv_df': hard_tanh},
-#     {'corr': 0, 'actv_h': hard_tanh},
-#     {'kp': 2}, {'kp': 4}, {'kp': 10},
-#     {'kp': 20}, {'kp': 500}, {'kp': 0.5},
-#     {'kp': 0.1}, {'kp': 1}
-# ]
+
 model_list = []
 dim = 1
 
@@ -210,7 +182,6 @@ axes = plt.gca()
 axes.tick_params(axis='x', labelsize=50)
 axes.tick_params(axis='y', labelsize=50)
 colors = [
-    "mediumvioletred",
     "red",
     "deepskyblue",
     "royalblue",
@@ -223,7 +194,6 @@ colors = [
 ]
 line_styles = [
     ':',
-    ':',
     '-.',
     '-.',
     '-.',
@@ -234,7 +204,6 @@ line_styles = [
     '--',
 ]
 line_widths = [
-    5,
     5,
     6,
     6,
@@ -252,7 +221,7 @@ num_epochs = 40
 for i in range(2):
     print(i, modelnames[i])
     odesizelist = []
-    for r in range(10):
+    for r in range(1):
         # for epoch_idx in range(num_epochs):
         cell = modelclass[i](DF(*dfparams[i]), **cellparams[i])
         ic = initial_velocity(input_t, *icparams[i])
@@ -266,7 +235,7 @@ for i in range(2):
     plt.plot(dat, line_styles[i], linewidth=line_widths[i], label=modelnames[i], color=colors[i])
     sizedata.append(dat)
 
-for i in range(2, 10):  # pidhbnode
+for i in range(2, 9):  # pidnode
     print(i, modelnames[i])
     odesizelist = []
     for r in range(10):
@@ -281,15 +250,10 @@ for i in range(2, 10):  # pidhbnode
     dat = np.log10(np.mean(odesizelist, axis=0))
     plt.plot(dat, label=modelnames[i], linewidth=5, color=colors[i])
     sizedata.append(dat)
-# '''
-# sizedata = np.loadtxt('output/sb/sbinit.csv', delimiter=',')
-# for i in range(13):
-#     plt.plot(sizedata[i], label=modelnames[i], linewidth=5, color=colors[i])
 
 plt.plot(np.log10(np.abs(trdat[1][:81])), label='Exact', linewidth=5, color='k')
 tickrange = np.linspace(0, 18, 10)
 plt.yticks(tickrange, ['$10^{{{}}}$'.format(int(i)) for i in tickrange])
-# ax.yaxis.set_major_formatter('10^{x}')
 plt.xlabel("$t$", fontsize=50)
 plt.ylabel("||${\\mathbf{h}}(t)||_2$", fontsize=50)
 plt.grid(visible=True, which='major', color='#666666', linestyle='-')

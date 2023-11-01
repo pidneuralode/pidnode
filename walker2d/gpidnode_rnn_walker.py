@@ -45,11 +45,11 @@ class temprnn(nn.Module):
 class MODEL(nn.Module):
     def __init__(self, res=False, cont=False):
         super(MODEL, self).__init__()
-        nhid = 17
-        self.cell = PIDHBNODE(tempf(nhid, nhid))
+        nhid = 24
+        self.cell = PIDNODE(tempf(nhid, nhid), actv_h=nn.Tanh(), actv_df=nn.Tanh())
         self.rnn = temprnn(17, nhid, nhid, res=res, cont=cont)
         evaluation_times = torch.Tensor([1, 2])
-        self.ode_rnn = ODE_RNN_with_Grad_Listener(self.cell, self.rnn, (3, nhid), None, tol=1e-7, nesterov_algebraic=False, time_requires_grad=False, evaluation_times=evaluation_times)
+        self.ode_rnn = ODE_RNN_with_Grad_Listener(self.cell, self.rnn, (3, nhid), None, tol=1e-7, nesterov_algebraic=True, time_requires_grad=False, evaluation_times=evaluation_times)
         self.outlayer = nn.Linear(nhid, 17)
 
     def forward(self, t, x):
@@ -66,8 +66,8 @@ def main(gpu_device):
     cont = True
     torch.manual_seed(0)
     model = MODEL(res=res, cont=cont).to(gpu_device)
-    modelname = 'PIDHBNODE'
     # 这里需要对于升维之后的数据进行前置的处理
+    modelname = 'GPIDNODE'
     # model.load_state_dict(torch.load('output/walker2d/walker_{}_rnn_{}.csv'.format(modelname, count_parameters(model))))
     print(model.__str__())
     rec = Recorder()
@@ -78,7 +78,6 @@ def main(gpu_device):
     for epoch in range(500):
         rec['epoch'] = epoch
         if epoch in lr_dict:
-            # 强行对优化器的学习率进行调整
             optimizer = torch.optim.Adam(model.parameters(), lr=lr_dict[epoch])
 
         batchsize = 256
