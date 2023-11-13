@@ -202,25 +202,6 @@ def main(modelname: str):
                                        evaluation_times=evaluation_times,
                                        args=args)
         iv = models.pidnode_initial_velocity(3, dim, nhid)
-    elif modelname == 'node_ss':
-        dim = 3
-        hidden = 125
-        df = models.DF(dim, hidden, args=args)
-        method = "euler"
-        step_size = 0.5
-        model_layer = models.NODElayer(models.NODE(df), evaluation_times=evaluation_times, args=args, method=method,
-                                       step_size=step_size)
-        iv = models.anode_initial_velocity(3, aug=dim, args=args)
-    elif modelname == 'ghbnode_ss':
-        dim = 12
-        hidden = 51
-        args.xres = 1.5
-        df = models.DF(dim, hidden, args=args)
-        iv = models.initial_velocity(3, dim, hidden)
-        method = "euler"
-        step_size = 0.5
-        model_layer = models.NODElayer(models.HeavyBallNODE(df, None, thetaact=tanh_act, timescale=args.timescale),
-                                       evaluation_times=evaluation_times, args=args, method=method, step_size=step_size)
 
     # 对于所有的模型进行遍历训练操作
     # create the model
