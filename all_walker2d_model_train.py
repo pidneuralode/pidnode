@@ -1,9 +1,8 @@
 import argparse
-from walker2d import node_rnn_walker, anode_rnn_walker, sonode_rnn_walker, hbnode_rnn_walker, ghbnode_rnn_walker, \
-    pidnode_rnn_walker_rnn_walker, gpidnode_rnn_walker
+from walker2d import node_rnn_walker, anode_rnn_walker, sonode_rnn_walker, hbnode_rnn_walker, ghbnode_rnn_walker, gpidnode_rnn_walker
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--models', nargs='+', default=['pidnode'],
+parser.add_argument('--models', nargs='+', default=['hbnode'],
                     help="List of models to run")
 parser.add_argument('--gpu', type=int, default=0)
 parser.add_argument('--batch-size', type=int, default=256)
@@ -16,7 +15,6 @@ run_walker = {
     'sonode': sonode_rnn_walker.main,
     'hbnode': hbnode_rnn_walker.main,
     'ghbnode': ghbnode_rnn_walker.main,
-    'pidnode':  pidnode_rnn_walker_rnn_walker.main,
     'gpidnode': gpidnode_rnn_walker.main,
 }
 
