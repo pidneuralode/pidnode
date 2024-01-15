@@ -22,4 +22,4 @@ To simplify operations by reducing the number of core packages installed, we hav
 
 The work flow of our proposed PIDNODE can be shown at the picture below.
 
-![](/Users/wangpengkai/Desktop/PIDNODE-main/pidnode.PNG)
+![](pidnode.PNG)
