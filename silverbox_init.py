@@ -22,7 +22,6 @@ parser.add_argument('--npoints', type=int, default=1000)
 parser.add_argument('--experiment_no', type=int, default=1)
 args = parser.parse_args()
 
-# 随机化处理
 randomSeed = 18
 torch.manual_seed(randomSeed)
 torch.cuda.manual_seed(randomSeed)

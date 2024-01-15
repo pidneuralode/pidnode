@@ -129,6 +129,5 @@ for j, attribute in enumerate(["ts_nfe", "ts_loss"]):
 axbox = axes[1].get_position()
 l5 = plt.legend(bbox_to_anchor=(0.5, axbox.y0 - 0.25), loc="lower center",
                 bbox_transform=fig.transFigure, ncol=4)
-# plt.savefig(f"walker2d.pdf", transparent=True, bbox_inches='tight', pad_inches=0)
 plt.savefig(f"walker2d.jpg", transparent=True, bbox_inches='tight', pad_inches=0, dpi=600)
 plt.show()
