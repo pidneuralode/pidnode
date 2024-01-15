@@ -7,21 +7,21 @@ font = {'size': 40}
 
 plt.rc('font', **font)
 
-# 导入训练之后的walker2d数据文件 进行加载
+# import the trained walker2d data file for loading
 names = ["NODE", "ANODE",
          "SONODE",
          "HBNODE", "GHBNODE",
           "PIDNODE",
          "GPIDNODE",
          ]
-# 画图中指代的模型的名称，可能会出现不一致的情况
+# the name of the model referred to in the diagram may vary.
 alt_names = ["NODE", "ANODE",
          "SONODE",
          "HBNODE", "GHBNODE",
          "PIDNODE",
          "GPIDNODE",
          ]
-# 直接导入对应的csv文件信息
+# import the corresponding information from the csv file
 file_names = ["../output/walker2d/walker_NODE_rnn_9929.csv", "../output/walker2d/walker_ANODE_rnn_10019.csv",
               "../output/walker2d/walker_SONODE_rnn_9861.csv",
               "../output/walker2d/walker_HBNODE_rnn_10099_12.csv", "../output/walker2d/walker_GHBNODE_rnn_10099_12.csv",
@@ -34,7 +34,7 @@ for i in range(len(names)):
     temp_df = pd.read_csv(file_names[i])
     df_names[names[i]] = temp_df[attr_names]
 
-# 配置曲线的性质
+# properties of the configuration curve
 colors = [
     "mediumvioletred",
     "red",
@@ -78,7 +78,6 @@ ax4 = fig.add_subplot(gs[1, 1:3])
 ax5 = fig.add_subplot(gs[1, 3:5])
 axes = (ax1, ax2, ax4)
 
-# 对于加载到df对象中的含有属性和数值的数据进行画图操作
 height_width_ratio = "auto"
 alt_attr_names = ["Train Forward NFEs", "Train Backward NFEs", "Train Loss"]
 for j, attribute in enumerate(["forward_nfe", "backward_nfe", "loss"]):
@@ -125,7 +124,6 @@ for j, attribute in enumerate(["ts_nfe", "ts_loss"]):
         axes[j].set_ylim([0.9, 2.6])
     axes[j].grid()
 
-# 核心就是做了信息的展示操作 和mnist是一样的
 axbox = axes[1].get_position()
 l5 = plt.legend(bbox_to_anchor=(0.5, axbox.y0 - 0.25), loc="lower center",
                 bbox_transform=fig.transFigure, ncol=4)
