@@ -117,7 +117,7 @@ parser.add_argument(
     default=1.5
 )
 
-# 临时补充pidnode参数的输入
+# input the temporary additional pidnode parameter.
 parser.add_argument('--kp', type=float, default=2.)
 parser.add_argument('--ki', type=float, default=2)
 parser.add_argument('--kd', type=float, default=1.5)
@@ -183,7 +183,7 @@ def main(modelname: str):
                                        evaluation_times=evaluation_times, args=args)
         iv = models.initial_velocity(3, dim, hidden)
     elif name == 'pidnode':
-        # 调整隐藏层的数目
+        # adjust the number of hidden layers.
         dim = 12
         nhid = 49
         model_layer = models.NODElayer(models.PIDNODE(models.DF(dim, nhid, args=args), sign=-1, ki=args.ki,
@@ -203,7 +203,7 @@ def main(modelname: str):
                                        args=args)
         iv = models.pidnode_initial_velocity(3, dim, nhid)
 
-    # 对于所有的模型进行遍历训练操作
+    # for all models, perform an iterative training operation.
     # create the model
     model = nn.Sequential(
         iv,

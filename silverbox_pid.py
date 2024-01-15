@@ -21,7 +21,6 @@ parser.add_argument('--npoints', type=int, default=1000)
 parser.add_argument('--experiment_no', type=int, default=1)
 args = parser.parse_args()
 
-# 随机化处理
 randomSeed = 18
 torch.manual_seed(randomSeed)
 torch.cuda.manual_seed(randomSeed)
@@ -107,7 +106,6 @@ class initial_velocity_pid(nn.Module):
         else:
             xpad = x0
 
-        # 存疑 看看可不可以修改一下 并且哪种拼接形式是最好的
         out = self.fc1(torch.ones_like(x0))
 
         out = torch.cat([xpad, out], dim=0).reshape(1, 3, -1)
@@ -132,7 +130,6 @@ class DF(nn.Module):
         # out = 0.4905 * x + 0.00618 * x ** 3 + 0.0613 * v1
         return out
 
-# 目前的基准模型为 kp=2, ki=1.5, kd=2 的pid模型
 modelnames = [
     'GNesterovNODE', 'GHBNODE',
     'PIDNODE(ki=1.5)', 'PIDNODE(ki=3)', 'PIDNODE(ki=5)',

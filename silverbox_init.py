@@ -108,7 +108,6 @@ class initial_velocity_pid(nn.Module):
         else:
             xpad = x0
 
-        # 存疑 看看可不可以修改一下 并且哪种拼接形式是最好的
         out = self.fc1(torch.ones_like(x0))
 
         out = torch.cat([xpad, out], dim=0).reshape(1, 3, -1)

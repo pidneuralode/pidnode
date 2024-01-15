@@ -237,7 +237,7 @@ class NesterovNODE(NODE):
 
 class HighNesterovNODE(NODE):
     """
-    引入梯度关于时间的偏导作为减少震荡的操作
+    introduce the partial derivative of the gradient with respect to time as a operation to reduce oscillation.
     """
 
     def __init__(self, df, actv_h=None, corr=-100, corrf=True, gamma_guess=-3.0, gamma_act='sigmoid',
@@ -285,7 +285,7 @@ class HighNesterovNODE(NODE):
 class PIDNODE(NODE):
     def __init__(self, df, actv_h=None, gamma=-3.0, gammaact='sigmoid', corr=-100, corrf=True, sign=1,
                  kp=2, ki=1.5, kd=5, actv_m=None, actv_dm=None, actv_df=None, general_type=3):
-        # 目前最优的一组参数:kp=2 ki=1.5 kd=5
+        # the current optimal set of parameters is: kp=2 ki=1.5 kd=5
         super().__init__(df)
         # Momentum parameter gamma
         self.gamma = nn.Parameter(torch.Tensor([gamma]))
@@ -307,7 +307,7 @@ class PIDNODE(NODE):
 
         # self.act = nn.ReLU()
         self.corr = nn.Parameter(torch.Tensor([corr]))
-        # 泛化类型
+        # generalized type
         self.gt = general_type
 
     def forward(self, t, x):
@@ -329,38 +329,38 @@ class PIDNODE(NODE):
 
         # import pdb; pdb.set_trace()
         # dh = self.actv_h(-m) / (torch.sqrt(torch.sigmoid(v))+ self.epsilon)
-        # 做了一个微小量的下限保证 df不做泛化处理 做一定的初始化操作
+        # made a small lower limit guarantee to ensure that df does not undergo generalization, and performed certain initialization operations.
         dh = self.actv_h(m)
         if self.gt == 1:
-            # 泛化1
+            # type 1
             df = self.df(t, h)
             dm = self.actv_h(-self.kp * h - (self.gammaact(self.gamma) + self.kd) * m - self.ki * v) + df
             dv = h
         elif self.gt == 2:
-            # 泛化 2
+            # type 2
             df = self.df(t, h)
             dm = -self.kp * h - (self.gammaact(self.gamma) + self.kd) * m - self.ki * v + df
             dv = self.actv_h(h)
         elif self.gt == 3:
-            # 泛化 3
+            # type 3
             df = self.actv_df(self.df(t, h))
             dm = self.actv_h(-self.kp * h - (self.gammaact(self.gamma) + self.kd) * m - self.ki * v + df) - \
                  self.sp(self.corr) * h
             dv = self.actv_h(h)
         elif self.gt == 4:
-            # 泛化4
+            # type 4
             df = self.actv_df(self.df(t, h))
             dm = -self.kp * h - (self.gammaact(self.gamma) + self.kd) * m - self.ki * v + df
             dv = self.actv_h(h)
         elif self.gt == 5:
-            # 泛化5
+            # type 5
             df = self.actv_df(self.df(t, h))
             dm = -self.kp * h - (self.gammaact(self.gamma) + self.kd) * m - self.ki * v + df
             dv = h
         else:
             raise NotImplementedError
 
-        # 不泛化
+        # no general type
         # dh = m
         # df = self.df(t, h)
         # dm = -self.kp*h-(self.gammaact(self.gamma())+self.kd)*m\

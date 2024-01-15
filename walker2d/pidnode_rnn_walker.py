@@ -67,7 +67,7 @@ def main(gpu_device):
     torch.manual_seed(0)
     model = MODEL(res=res, cont=cont).to(gpu_device)
     modelname = 'PIDNODE'
-    # 这里需要对于升维之后的数据进行前置的处理
+    # preprocessing of the dimensionality-increased data is required here.
     # model.load_state_dict(torch.load('output/walker2d/walker_{}_rnn_{}.csv'.format(modelname, count_parameters(model))))
     print(model.__str__())
     rec = Recorder()
@@ -78,7 +78,7 @@ def main(gpu_device):
     for epoch in range(500):
         rec['epoch'] = epoch
         if epoch in lr_dict:
-            # 强行对优化器的学习率进行调整
+            # forcefully adjusting the learning rate of the optimizer.
             optimizer = torch.optim.Adam(model.parameters(), lr=lr_dict[epoch])
 
         batchsize = 256

@@ -8,7 +8,7 @@ parser.add_argument('--gpu', type=int, default=0)
 parser.add_argument('--batch-size', type=int, default=256)
 args = parser.parse_args()
 
-# 开始导入全部的可以使用的模型
+# start importing all available models.开始导入所有可用的模型
 run_walker = {
     'node': node_rnn_walker.main,
     'anode': anode_rnn_walker.main,

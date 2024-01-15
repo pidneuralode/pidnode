@@ -25,9 +25,9 @@ parser.add_argument('--log-file', default="outdat1", help="name of the logging c
 parser.add_argument('--no-run', action="store_true", help="To not run the training procedure")
 parser.add_argument('--batch-size', type=int, default=64)
 
-# 针对于pidnode泛化类型的输入参数
+# regarding the generic input parameters of the pidnode.
 parser.add_argument('--pid-general-type', type=int, default=3)
-# 临时补充pidnode参数的输入
+# temporary addition of the pidnode parameter input.
 parser.add_argument('--kp', type=float, default=2.)
 parser.add_argument('--ki', type=float, default=2.)
 parser.add_argument('--kd', type=float, default=1.5)
@@ -262,7 +262,7 @@ if __name__ == '__main__':
         if not args.no_run:
             log = open('./output/mnist/log_{}.txt'.format(runnum), 'w')
             datfile = open('./output/mnist/mnist_dat_{}_{}.txt'.format(runnum, args.tol), 'wb')
-            # 构建模型
+            # build the whole model
         model = model_gen(name, tol=args.tol, gpu=args.gpu)
         print(name, count_parameters(model), *[count_parameters(i) for i in model])
         optimizer = optim.Adam(model.parameters(), lr=args.lr / 2, weight_decay=0.000)

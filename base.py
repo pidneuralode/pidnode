@@ -268,7 +268,7 @@ class PIDNODE(NODE):
     def __init__(self, df, actv_h=None, gamma_guess=-3.0, gamma_act='sigmoid', sign=1,
                  kp=1, ki=1, kd=2, actv_m=None, actv_dm=None, actv_df=None, general_type=6,
                  corr=-100, corrf=True):
-        # 目前最优的一组参数:kp=2 ki=1.5 kd=2
+        # the current optimal set of parameters: kp=2, ki=1.5, kd=2.
         super().__init__(df)
         # Momentum parameter gamma
         self.gamma = Parameter([gamma_guess], frozen=False)
@@ -281,12 +281,12 @@ class PIDNODE(NODE):
         self.actv_m = nn.Identity() if actv_m is None else actv_m  # Activation for dh, GNNODE only
         self.actv_dm = nn.Identity() if actv_dm is None else actv_dm  # Activation for dh, GNNODE only
         self.actv_df = nn.Identity() if actv_df is None else actv_df  # Activation for df, GNNODE only
-        # 引入一个类似于resnet的残差项目
+        # introduce a residual project similar to ResNet.
         self.corr = Parameter([corr], frozen=corrf)
 
         # self.act = nn.ReLU()
 
-        # 泛化类型
+        # Generic types
         self.gt = general_type
 
     def forward(self, t, x):
@@ -307,41 +307,41 @@ class PIDNODE(NODE):
 
         # import pdb; pdb.set_trace()
         # dh = self.actv_h(-m) / (torch.sqrt(torch.sigmoid(v))+ self.epsilon)
-        # 做了一个微小量的下限保证 df不做泛化处理
+        # make a small lower limit guarantee that df will not be generalized.
         dh = self.actv_h(m)
         if self.gt == 1:
-            # 泛化1
+            # type 1
             df = self.df(t, h)
             dm = self.actv_h(-self.kp * h - (self.gammaact(self.gamma()) + self.kd) * m - self.ki * v) + df
             dv = h
         elif self.gt == 2:
-            # 泛化 2
+            # type 2
             df = self.df(t, h)
             dm = -self.kp * h - (self.gammaact(self.gamma()) + self.kd) * m - self.ki * v + df
             dv = self.actv_h(h)
         elif self.gt == 3:
-            # 泛化 3
+            # type 3
             df = self.actv_df(self.df(t, h))
             dm = self.actv_h(-self.kp * h - (self.gammaact(self.gamma()) + self.kd) * m - self.ki * v + df)
             dv = self.actv_h(h)
         elif self.gt == 4:
-            # 泛化4
+            # type 4
             df = self.actv_df(self.df(t, h))
             dm = -self.kp * h - (self.gammaact(self.gamma()) + self.kd) * m - self.ki * v + df
             dv = self.actv_h(h)
         elif self.gt == 5:
-            # 泛化5
+            # type 5
             df = self.actv_df(self.df(t, h))
             dm = self.actv_h(-self.kp * h - (self.gammaact(self.gamma()) + self.kd) * m - self.ki * v + df)
             dv = self.actv_h(h)
         elif self.gt == 6:
-            # 这里是作为泛化3的版本加上了类似于残差网络的结构，测试一下效果
+            # here is the version with a residual network-like structure, let’s test its performance.
             df = self.actv_df(self.df(t, h))
             dm = self.actv_h(-self.kp * h - (self.gammaact(self.gamma()) + self.kd) * m - self.ki * v + df) - \
                  self.sp(self.corr()) * h
             dv = self.actv_h(h)
 
-        # 不泛化
+        # no general type
         # dh = m
         # df = self.df(t, h)
         # dm = -self.kp*h-(self.gammaact(self.gamma())+self.kd)*m\
@@ -408,7 +408,7 @@ class ODE_RNN(nn.Module):
         return out
 
 
-# 带有数据监听操作接口的ODE_RNN结构
+# ODE_RNN structure with data monitoring operation interface
 class ODE_RNN_with_Grad_Listener(nn.Module):
     def __init__(self, ode, rnn, nhid, ic, rnn_out=False, both=False, tol=1e-7, method="dopri5", evaluation_times=None,
                  nesterov_algebraic=None, activation_h=None, time_requires_grad=True):
@@ -429,11 +429,10 @@ class ODE_RNN_with_Grad_Listener(nn.Module):
 
     def forward(self, t, x, multiforecast=None, retain_grad=False):
         """
-        -- 采用的ode-rnn结构 首先采用rnn结构获取之前的隐藏层特征，然后采用ode进行传播获得下一个时刻的特征
+        -- The ODE-RNN structure adopts an RNN architecture to first obtain the hidden layer features and then uses ODE for propagation to obtain the features of the next moment.
         :param t: [time, batch]
         :param x: [time, batch, ...]
         :return: [time, batch, *nhid]
-        这里采用的算法结构是: 也就是需要ode结构来获取rnn结构中的次特征量，之后再根据当前的输入变量获取当前时刻对于模型的输出预测
         for i in 1,2,...,N do
             h_ode[i] = odesolve(node, h_rnn[i-1], evaluation_time)
             h_rnn[i] = rnn(h_ode[i], x[i])
@@ -448,7 +447,7 @@ class ODE_RNN_with_Grad_Listener(nn.Module):
         if self.ic:
             h_ode[0] = h_rnn[0] = self.ic(rearrange(x, 't b c -> b (t c)')).view((n_b, *self.nhid))
         else:
-            # ode结构初始化数值
+            # structure initialization of values in code
             h_ode[0] = h_rnn[0] = torch.zeros(n_b, *self.nhid, device=x.device)
         if self.rnn_out:
             for i in range(n_t):

@@ -51,7 +51,7 @@ args = parser.parse_args()
 # Create training data in 2D, consisting of a concentric disk and an annulus
 data_dim = 2
 # updated the range to match HeavyBall exp settings
-# 构建同心圆结构的数据的数据集合，当前设置为2维度的
+# the dataset with a concentric circle structure is currently set to 2 dimensions.
 # data_concentric = ConcentricSphere(data_dim, inner_range=(0., .5), outer_range=(0.85, 1.0),
 #                                    num_points_inner=40, num_points_outer=80)
 data_concentric = ConcentricSphere(data_dim, inner_range=(0., 1.5), outer_range=(3.2, 3.9),
@@ -228,7 +228,7 @@ if args.visualize_results == 1 and not args.visualize_features:
     ]
     display_attr = ["NFEs", "NFEs (backward)", "Loss"]
     save_names = ["nfe", "bnfe", "loss"]
-    # 预设画图的颜色，线条等
+    # set the colors, lines, etc. for drawing.
     colors = [
         "mediumvioletred",
         "red",
